@@ -4,48 +4,32 @@ import random
 import datetime
 from pathlib import Path
 import pandas as pd
-# todo : CartPole-v0
+# todo : FrozenLake-v0
 
 """
 ! ghi chú về bài toán
 
-    Description:
-        A pole is attached by an un-actuated joint to a cart, which moves along
-        a frictionless track. The pendulum starts upright, and the goal is to
-        prevent it from falling over by increasing and reducing the cart's
-        velocity.
-    Source:
-        This environment corresponds to the version of the cart-pole problem
-        described by Barto, Sutton, and Anderson
-    *Observation:
-        Type: Box(4)
-        Num     Observation               Min                     Max
-        0       Cart Position             -4.8                    4.8
-        1       Cart Velocity             -Inf                    Inf
-        2       Pole Angle                -0.418 rad (-24 deg)    0.418 rad (24 deg)
-        3       Pole Angular Velocity     -Inf                    Inf
-    *Actions:
-        Type: Discrete(2)
-        Num   Action
-        0     Push cart to the left
-        1     Push cart to the right
-        Note: The amount the velocity that is reduced or increased is not
-        fixed; it depends on the angle the pole is pointing. This is because
-        the center of gravity of the pole increases the amount of energy needed
-        to move the cart underneath it
-    *Reward:
-        Reward is 1 for every step taken, including the termination step
-    *Starting State:
-        All observations are assigned a uniform random value in [-0.05..0.05]
-    *Episode Termination:
-        Pole Angle is more than 12 degrees.
-        Cart Position is more than 2.4 (center of the cart reaches the edge of
-        the display).
-        Episode length is greater than 200.
-        Solved Requirements:
-        Considered solved when the average return is greater than or equal to
-        195.0 over 100 consecutive trials.
-
+    Winter is here. You and your friends were tossing around a frisbee at the
+    park when you made a wild throw that left the frisbee out in the middle of
+    the lake. The water is mostly frozen, but there are a few holes where the
+    ice has melted. If you step into one of those holes, you'll fall into the
+    freezing water. At this time, there's an international frisbee shortage, so
+    it's absolutely imperative that you navigate across the lake and retrieve
+    the disc. However, the ice is slippery, so you won't always move in the
+    direction you intend.
+    
+    *The surface is described using a grid like the following
+        SFFF
+        FHFH
+        FFFH
+        HFFG
+    
+    S : starting point, safe
+    F : frozen surface, safe
+    H : hole, fall to your doom
+    G : goal, where the frisbee is located
+    *The episode ends when you reach the goal or fall in a hole.
+    !You receive a reward of 1 if you reach the goal, and zero otherwise.
 
 """
 
@@ -166,26 +150,37 @@ def run_game(env,k_game,episode, q_table,bins):
 
 def main_v001():
     # *dir file weight 
-    dirfile = 'weight\CartPole-v0_Qtable_v001.npy'
+    dirfile = 'weight\FrozenLake-v0_Qtable_v001.npy'
 
     # *rate
-    epsilon = 0.9
-    discount_factor = 0.9
-    learning_rate = 0.9
+    epsilon = 0.8
+    discount_factor = 0.84
+    learning_rate = 0.84
 
     # *create env
-    env = gym.make('CartPole-v0')
+    env = gym.make("FrozenLake-v1")
 
     # * action, reward, q_table(s,a)
-    action = ['left', 'right']
+    action = ['left', 'down', 'right', 'up']
     reward = 1
 
-    state_space = 4
-    action_space = 2
+    state_space = 16
+    action_space = 4
     bins_size = 30 # state can infinity, so we collap them to bins
 
-    q_table,bins = create_Qtable(state_space,action_space,bins_size)
-    print("q_table",q_table.shape,",bins",bins.shape)
+    #q_table,bins = create_Qtable(state_space,action_space,bins_size)
+    #print("q_table",q_table.shape,",bins",bins.shape)
+    
+    # test
+    env.reset()
+    
+    for _ in range(5):
+        env.render()
+        observation, reward, done, info = env.step(2)
+        print(observation, reward,done)
+
+
+    env.close()
 
     
     '''
@@ -205,7 +200,7 @@ def main_v001():
     save_weight(dirfile,q_table)
     print('save weight to ',dirfile)
     '''
-
+    '''
     # TODO : load weight and run
     q_table = load_weight(dirfile)
     print('q_table ',q_table.shape)
@@ -222,11 +217,8 @@ def main_v001():
 
     arr_reward_Solved = np.delete(arr_reward,np.where(arr_reward<195))
     print('Average ',arr_reward_Solved.shape[0],'k_game_Solved = ',np.average( arr_reward_Solved ) )
+    '''
     
-    #*Average  300 k_game =  144.57666666666665
-    #*Average  78 k_game_Solved =  199.66666666666666
-    #*Average  2000 k_game =  140.656
-    #*Average  501 k_game_Solved =  199.71656686626747
 
 if(__name__ == '__main__'):
     
